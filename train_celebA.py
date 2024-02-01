@@ -161,22 +161,7 @@ elif args.dataset == 'celebA':
         subset_dataset = data.Subset(eval_dataset_img, new_indices)
         print('Loading ...')
         eval_loader_img = DataLoader(subset_dataset, batch_size=args.batch_size, shuffle=False,pin_memory=True,num_workers=8)
-        # labels_eval = np.array([label.item() for idx, (_, label, color_red) in enumerate(eval_loader_img.dataset)])
-        # cluster_labels_eval = np.array([color_red[0].item() for idx, (_, label, color_red) in enumerate(eval_loader_img.dataset)])
-        # same_predictions_indices_1 = np.where(np.logical_and(labels_eval == 1, labels_eval == cluster_labels_eval))[0]
-        # same_predictions_indices_0 = np.where(np.logical_and(labels_eval == 0, labels_eval == cluster_labels_eval))[0]
-        # different_predictions_indices_0 = np.where(np.logical_and(labels_eval == 0, labels_eval != cluster_labels_eval))[0]
-        # different_predictions_indices_1 = np.where(np.logical_and(labels_eval == 1, labels_eval != cluster_labels_eval))[0]
-        # sample_same_predictions_indices_1 = random.choices(list(same_predictions_indices_1), k=args.g4)
-        # sample_same_predictions_indices_0 = random.choices(list(same_predictions_indices_0), k=args.g1)
-        # sample_different_predictions_indices_1 = random.choices(list(different_predictions_indices_1), k=args.g3)
-        # sample_different_predictions_indices_0 = random.choices(list(different_predictions_indices_0), k=args.g2)
-        # new_indices = sample_same_predictions_indices_1 + sample_same_predictions_indices_0 + sample_different_predictions_indices_1 + sample_different_predictions_indices_0
-        # subset_dataset = data.Subset(eval_loader_img.dataset, new_indices)
-        # eval_loader_img = DataLoader(subset_dataset, batch_size=args.batch_size, shuffle=False)
-
-
-
+        
 
 def train_scratch(model, epochs):
     model.train()
@@ -212,7 +197,6 @@ def train_scratch(model, epochs):
 
 
 #Create model
-
 if args.model_type == 'r50': #r50:
     # net = load_pretrained_model('/home/yujin/dm/correct-n-contrast/model/celebA/celeba_erm_regularized.pt', args)
     # net = FineTuneResnet50().to(device)
@@ -236,9 +220,7 @@ elif args.model_type == 'lenet5': #r50:
     net = train_scratch(net, args.epochs)
 
        
-# else:
-#     # exteactor model load
-#     net = ResNet_Model(name='resnet34', num_classes=num_classes)
+
 if args.dataset == 'cmnist':
       worst_indices_test = [idx for idx, (_, label, slabel) in enumerate(test_loader_img.dataset) if label == slabel]
 elif args.dataset == 'waterbirds':
@@ -264,7 +246,7 @@ def test_worst_(worst_loader):
 
 
 # /////////////// Training ///////////////
-criterion_train = nn.BCELoss()#torch.nn.CrossEntropyLoss()
+criterion_train = nn.BCELoss()
 # optimizer_train = optim.SGD(net.parameters(), lr=args.lr, weight_decay=args.decay)
 def train(train_loader_img,min_loader_img=None):
     net.train()
@@ -312,11 +294,6 @@ def train(train_loader_img,min_loader_img=None):
         prev_path = os.path.join(args.save, args.dataset + '_classifier' + '_depoch' + str(args.disk_epochs)+'_dlr'+str(args.disk_lr) +'_label'+ str(args.use_label) +'_hcs'+str(args.hcs)+ '_s' + str(args.seed) +
                             '_' + args.mode+ '_epoch_' + str(epoch-1) + '.pt')
         if os.path.exists(prev_path): os.remove(prev_path)
-
-        # Show results
-        # with open(os.path.join(args.save, args.dataset + '_DISK' + '_depoch' + str(args.disk_epochs)+'_dlr'+str(args.disk_lr )+'_label'+ str(args.use_label) +'_hcs'+str(args.hcs)+ '_s' + str(args.seed) + '_' + args.mode +str(args.upweight_factor)+ '_training_results.csv'), 'a') as f:
-        #                               f.write('%03d,%0.4f\n' % ((epoch + 1),running_loss/len(train_loader_img)))
-
 
         if min_loader_img is not None:
             min_correct = 0
@@ -386,18 +363,6 @@ def test():
          f.write('Train Accuracy| Eval Accuracy|Test Accuracy: %0.4f,%0.4f,%0.4f\n' % (train_accuracy,eval_accuracy, test_accuracy))
     
 def test_worst():
-    # if args.dataset == 'cmnist':
-    #     # worst_indices_train = [idx for idx, (_, label, slabel) in enumerate(train_loader_img.dataset) if label == slabel]
-    #     # worst_indices_eval = [idx for idx, (_, label, slabel) in enumerate(eval_loader_img.dataset) if label == slabel]
-    #     worst_indices_test = [idx for idx, (_, label, slabel) in enumerate(test_loader_img.dataset) if label == slabel]
-    # elif args.dataset == 'waterbirds':
-    #     # worst_indices_train = [idx for idx, (_, label, slabel) in enumerate(train_loader_img.dataset) if label != slabel[0]]
-    #     # worst_indices_eval = [idx for idx, (_, label, slabel) in enumerate(eval_loader_img.dataset) if label != slabel[0]]
-    #     worst_indices_test = [idx for idx, (_, label, slabel) in enumerate(test_loader_img.dataset) if label != slabel[0]]
-    # elif args.dataset == 'celebA':
-    #     # worst_indices_train = [idx for idx, (_, label, slabel) in enumerate(train_loader_img.dataset) if label == 1 and slabel[0] == 1]
-    #     # worst_indices_eval = [idx for idx, (_, label, slabel) in enumerate(eval_loader_img.dataset) if label == 1 and slabel[0] == 1]
-    #     worst_indices_test = [idx for idx, (_, label, slabel) in enumerate(test_loader_img.dataset) if label == 1 and slabel[0] == 1]
     worst_dataset = Subset(test_loader_img.dataset, worst_indices_test)
     worst_loader = DataLoader(worst_dataset, batch_size= args.batch_size, shuffle=True)
     net.eval()
@@ -477,7 +442,6 @@ elif args.model_type == 'lenet5':
 #     model = model.to(device)
 
 feature_extractor = torch.nn.Sequential(*list(model.children())[:-2])
-# feature_extractor = torch.nn.Sequential(*list(model.children())[:-1])
 feature_extractor[0].fc = torch.nn.Identity()
 
 
@@ -611,81 +575,6 @@ def test_disk(data_loader_img,hcs=args.hcs):
 
 
 
-
-# class EmbDataset(Dataset):
-#     def __init__(self, images, labels, slabels):
-#         self.images = images
-#         self.labels = labels
-#         self.slabels = slabels
-
-#     def __len__(self):
-#         return len(self.images)
-
-#     def __getitem__(self, idx):
-#         return self.images[idx], self.labels[idx], self.slabels[idx]
-
-
-# def embbeding(data_loader_img):
-#     # fc_outputs = []
-#     # labels_list = []
-#     # slabels_list = []
-#     dataset = EmbDataset([], [], [])
-#     for images, labels, slabels in tqdm(data_loader_img, desc="Extracting"):
-#         images, labels, slabels=images.to(device),labels.to(device),slabels.to(device)
-#         if args.dataset=='waterbirds' or args.dataset=='celebA':
-#             slabels = slabels[:, 0]
-#         outputs = feature_extractor(images)
-#         dataset.images.append(outputs)
-#         dataset.labels.append(labels)
-#         dataset.slabels.append(slabels)
-#     emb_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
-#     return emb_loader
-
-# class EmbDataset(Dataset):
-#     def __init__(self, data):
-#         self.features = torch.tensor(data.iloc[:, :-2].values, dtype=torch.float32)
-#         self.labels = torch.tensor(data.iloc[:, -2].values, dtype=torch.float32)
-#         self.slabels = torch.tensor(data.iloc[:, -1].values, dtype=torch.float32)
-
-#     def __len__(self):
-#         return len(self.features)
-
-#     def __getitem__(self, index):
-#         feature = self.features[index]
-#         label = self.labels[index]
-#         slabel = self.slabels[index]
-#         return feature, label, slabel
-
-# def embbeding(data_loader_img,name):
-#     fc_outputs = []
-#     labels_list = []
-#     slabels_list = []
-#     print('Beginning Extracting\n')
-#     for images, labels, slabels in tqdm(data_loader_img, desc='Processing images', unit='batch'):
-#     # for images, labels, slabels in data_loader_img:
-#         images, labels=images.to(device),labels.to(device)
-#         if args.dataset=='waterbirds' or args.dataset=='celebA':
-#             slabels = slabels[:, 0]
-#         outputs = feature_extractor(images)
-#         fc_output = outputs.view(outputs.size(0), -1).cpu().detach().numpy()
-#         fc_outputs.append(fc_output)
-#         labels_list.append(labels.cpu().numpy())
-#         slabels_list.append(slabels.cpu().numpy())
-    
-#     all_fc_outputs = np.concatenate(fc_outputs, axis=0)
-#     all_labels = np.concatenate(labels_list, axis=0)
-#     all_slabels = np.concatenate(slabels_list, axis=0)
-#     all_data = pd.concat([pd.DataFrame(all_fc_outputs),  pd.DataFrame(all_labels),  pd.DataFrame(all_slabels)], axis=1)
-#     num_columns = all_data.shape[1]
-#     column_names = ['F' + str(i) for i in range(1, num_columns-1)]
-#     column_names.append('label')
-#     column_names.append('slabel')
-#     all_data.columns = column_names
-#     emb_loader = DataLoader(EmbDataset(all_data), batch_size=args.batch_size, shuffle=False)
-#     return emb_loader
-
-# extract embedding
-
 train_loader_emb =  embbeding(train_loader_img,'train')
 eval_loader_emb =  embbeding(eval_loader_img,'eval')
 test_loader_emb =  embbeding(test_loader_img,'test')
@@ -737,10 +626,9 @@ if args.adjust:
 
 
 
-# /////////////// Training DISK ///////////////
+# /////////////// Training GDC///////////////
 
 dim = train_loader_emb.dataset[0][0].shape[0]
-# dim = test_loader_emb.dataset[0][0].shape[0]
 
 
 
@@ -753,90 +641,6 @@ else:
 
 optimizer_spurious =  optim.SGD(spurious_net.parameters(), lr=args.disk_lr, momentum=0.9)
 optimizer_disk = optim.SGD(disk_net.parameters(),  lr=args.disk_lr, momentum=0.9)
-
-# def train_disk(train_loader, eval_loader,start_avg_et=1.0,unbiased_loss=False):
-#     # all_mi = []
-#     # CE = []
-#     # MINE = []
-#     avg_et = start_avg_et
-#     for epoch in range(args.disk_epochs):
-#         running_loss = 0.0
-#         kl_loss = 0.0
-#         pre_loss = 0.0
-#         for (inputs_train, labels_train, _), (inputs_eval, labels_eval, _) in zip(train_loader, eval_loader):
-#             inputs_train = inputs_train.to(device)
-#             # print('inputs_train.shape)',inputs_train.shape)
-#             labels_train = labels_train.to(device)
-#             inputs_eval = inputs_eval.to(device)
-#             labels_eval = labels_eval.to(device)
-
-#             optimizer_spurious.zero_grad()
-#             optimizer_disk.zero_grad()
-
-#             outputs_train = spurious_net(inputs_train)
-#             outputs_eval = spurious_net(inputs_eval)
-
-#             # Prediction Loss
-#             loss_cluster_train = nn.BCELoss()(outputs_train, labels_train.float().view(-1, 1))
-
-#             # MI Loss
-#             if args.use_label:
-#                 KL_loss,avg_et = disk_net(labels_train.float().view(-1, 1),labels_eval.float().view(-1, 1),outputs_train,outputs_eval,avg_et,unbiased_loss=unbiased_loss)
-#             else:
-#                 KL_loss,avg_et = disk_net(inputs_train, inputs_eval, outputs_train, outputs_eval,avg_et,unbiased_loss=unbiased_loss)
-            
-#             # Final Loss
-#             loss = loss_cluster_train - args.eval_weight * KL_loss
-
-#             loss.backward()
-#             optimizer_spurious.step()
-#             optimizer_disk.step()
-
-#             kl_loss = KL_loss.item()
-#             pre_loss = loss_cluster_train.item()
-#             running_loss = loss.item()
-
-#         print('Epoch [%d/%d]| Train Loss: %.4f | KL Loss: %.4f | Prediction Loss: %.4f' % (epoch+1, args.disk_epochs, running_loss, kl_loss, pre_loss))
-
-#         torch.save(spurious_net.state_dict(),
-#                os.path.join(args.save, args.dataset + '_spurious' + '_depoch' + str(args.disk_epochs)+'_dlr'+str(args.disk_lr) +'_label'+ str(args.use_label) +'_hcs'+str(args.hcs)+ '_s' + str(args.seed) +
-#                             '_' + args.mode+ '_epoch_' + str(epoch) + '.pt'))
-#         # Let us not waste space and delete the previous model
-#         prev_path = os.path.join(args.save, args.dataset + '_spurious' + '_depoch' + str(args.disk_epochs)+'_dlr'+str(args.disk_lr) +'_label'+ str(args.use_label) +'_hcs'+str(args.hcs)+ '_s' + str(args.seed) +
-#                             '_' + args.mode+ '_epoch_' + str(epoch - 1) + '.pt')
-#         if os.path.exists(prev_path): os.remove(prev_path)
-#         with open(os.path.join(args.save, args.dataset + '_DISK' + '_depoch' + str(args.disk_epochs)+'_dlr'+str(args.disk_lr )+'_label'+ str(args.use_label) +'_hcs'+str(args.hcs)+ '_s' + str(args.seed) + '_' + args.mode +str(args.upweight_factor)+ '_training_results.csv'), 'a') as f:
-#                                       f.write('%03d,%0.4f,%0.4f,%0.4f\n' % ((epoch + 1),running_loss,kl_loss,pre_loss))
-
-
-# def test_disk(data_loader_img,hcs=args.hcs):
-#     spurious_net.eval()
-#     correct = 0
-#     scorrect = 0
-#     pred_labels = []
-#     # pred_probs = []
-#     true_labels = []
-#     with torch.no_grad():
-#         for data_emb, label,slabel in data_loader_img:
-#             data_emb, label,slabel = data_emb.to(device), label.to(device), slabel.to(device)#.cuda()
-#             output = spurious_net(data_emb)
-#             # print(output)
-#             # pred = output.data.max(1)[1]
-#             pred = torch.squeeze(torch.round(torch.squeeze(output)))
-#             if hcs is not None:
-#                 for i in range(len(pred)):
-#                     if pred[i] != label[i] and hcs < output[i] < 1-hcs:
-#                            pred[i] = label[i]
-#             pred_labels.extend(pred.cpu().numpy())
-#             # pred_probs.extend(torch.squeeze(output).cpu().numpy())
-#             true_labels.extend(label.cpu().numpy())
-#             correct += (pred == label).sum().item()#pred.eq(label.data).sum().item()
-#             scorrect += (pred == slabel).sum().item()#pred.eq(slabel.data).sum().item()
-
-#     accuracy = correct / len(data_loader_img.dataset)
-#     saccuracy = scorrect / len(data_loader_img.dataset)
-#     saccuracy = max(saccuracy,1-saccuracy)
-#     return accuracy, saccuracy, pred_labels, true_labels
 
 
 
