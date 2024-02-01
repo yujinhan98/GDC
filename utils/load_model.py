@@ -110,9 +110,9 @@ class SpuriousNet(nn.Module):
             x = F.softmax(x, dim=1)
         return x
 
-class DISKNet(nn.Module):
+class GDCNet(nn.Module):
     def __init__(self,data_dim=1, out_dim = 1, hidden_size=10):
-        super(DISKNet, self).__init__()
+        super(GDCNet, self).__init__()
         self.layers1 = nn.Sequential(nn.Linear(out_dim + data_dim, hidden_size),
                                     nn.ReLU(),
                                     nn.Linear(hidden_size, 1))
@@ -152,9 +152,9 @@ class DISKNet(nn.Module):
             loss = loss1 - loss2
         return loss,avg_et
 
-class DISKNet_noy(nn.Module):
+class GDCNet_noy(nn.Module):
     def __init__(self,data_dim, out_dim = 1,hidden_size=10):
-        super(DISKNet_noy, self).__init__()
+        super(GDCNet_noy, self).__init__()
         self.layers1 = nn.Sequential(nn.Linear(out_dim + data_dim, 1))
         self.layers2 = nn.Sequential(nn.Linear(out_dim, 1))
 
