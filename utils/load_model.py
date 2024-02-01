@@ -73,8 +73,7 @@ class LeNet5(nn.Module):
         )
 
         self.classifier = nn.Sequential(
-            # nn.Linear(400, 120), # cnc版本 3*32*32
-            nn.Linear(16*4*4, 120), # 非cnc版本 3*28*28
+            nn.Linear(16*4*4, 120), 
             nn.ReLU(),
             nn.Linear(120, 84),
             nn.ReLU(),
@@ -92,33 +91,9 @@ class LeNet5(nn.Module):
         else:
             logits = F.softmax(logits,dim=1)
         return logits
-        # probas = F.softmax(logits, dim=1)
-        # return probas
 
 
-# class LeNet5(nn.Module):
-#     def __init__(self, num_classes):
-#         super(LeNet5, self).__init__()
-#         self.conv1 = nn.Conv2d(3, 6, 5)
-#         self.pool = nn.MaxPool2d(2, 2)
-#         self.conv2 = nn.Conv2d(6, 16, 5)
-#         self.fc1 = nn.Linear(16 * 4 * 4, 120)  # 16 * 5 * 5
-#         self.fc2 = nn.Linear(120, 84)  # Activations layer
-#         self.fc = nn.Linear(84, num_classes)
-#         self.relu_1 = nn.ReLU()
-#         self.relu_2 = nn.ReLU()
-#         self.activation_layer = torch.nn.ReLU
 
-#     def forward(self, x):
-#         # Doing this way because only want to save activations
-#         # for fc linear layers - see later
-#         x = self.pool(F.relu(self.conv1(x)))
-#         x = self.pool(F.relu(self.conv2(x)))
-#         x = torch.flatten(x, 1)#x.view(-1, 16 * 4 * 4)
-#         x = self.relu_1(self.fc1(x))
-#         x = self.relu_2(self.fc2(x))
-#         x = self.fc(x)
-#         return x
 
 
 class SpuriousNet(nn.Module):
@@ -180,21 +155,6 @@ class DISKNet(nn.Module):
 class DISKNet_noy(nn.Module):
     def __init__(self,data_dim, out_dim = 1,hidden_size=10):
         super(DISKNet_noy, self).__init__()
-        # self.avg_et=avg_et
-        # self.convlayers=nn.Sequential(
-        #     nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1),
-        #     nn.ReLU(),
-        #     nn.MaxPool2d(kernel_size=2, stride=2),
-        #     nn.Flatten(),
-        #     nn.Linear(3136, 64),
-        #     nn.ReLU()
-        # )
-        # self.layers1 = nn.Sequential(nn.Linear(1 + data_dim, hidden_size),
-        #                             nn.ReLU(),
-        #                             nn.Linear(hidden_size, 1))
-        # self.layers2 = nn.Sequential(nn.Linear(1, hidden_size),
-        #                             nn.ReLU(),
-        #                             nn.Linear(hidden_size, 1))
         self.layers1 = nn.Sequential(nn.Linear(out_dim + data_dim, 1))
         self.layers2 = nn.Sequential(nn.Linear(out_dim, 1))
 
@@ -294,14 +254,13 @@ def bert_adamw_optimizer(model, lr, weight_decay):
 
 from tqdm import tqdm
 def calculate_spurious_percentage(loader):
-    label_spurious_count = {}  # 用于存储每个标签对应的spurious label 的数量
-    label_count = {}  # 用于存储每个标签的总数量
-
+    label_spurious_count = {}  
+    label_count = {} 
     for inputs, labels, spurious in tqdm(loader, desc='Processing data', leave=True):
         # print(labels,spurious)
         for label, spurious_label in zip(labels, spurious):
-            label = label.item()  # 将标签转换为Python标量
-            spurious_label = spurious_label.item()  # 将spurious label 转换为Python标量
+            label = label.item()  
+            spurious_label = spurious_label.item() 
 
             if label in label_count:
                 label_count[label] += 1
@@ -316,7 +275,6 @@ def calculate_spurious_percentage(loader):
             else:
                 label_spurious_count[label] = {spurious_label: 1}
 
-    # 计算每个标签对应的spurious label 的百分比
     label_spurious_percentage = {}
     for label in label_spurious_count:
         total_count = label_count[label]
