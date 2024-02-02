@@ -1,2 +1,2 @@
-# GDC
-GDC: Infer Groups through Data Comparison
+# GIC
+GIC: Group Inference via data Comparison
