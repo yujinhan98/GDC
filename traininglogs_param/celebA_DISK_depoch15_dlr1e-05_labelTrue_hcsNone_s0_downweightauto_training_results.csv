@@ -10,7 +10,7 @@ adjust:False
 eval_weight:10
 hcs:None
 upweight_factor:auto
-save_path:./snapshots_update/
+save_path:./snapshots/
 seed:0
 gpu:7
 model_type:r50
