@@ -24,7 +24,7 @@ g1:None
 g2:None
 g3:None
 g4:None
-save:./snapshots_update/celebAr50_epoch50_lr0.001_eseval_downweight
+save:./snapshots/celebAr50_epoch50_lr0.001_eseval_downweight
 epoch,train_loss,KL_loss,pre_error(%)
 001,0.3168,0.0128,0.4443
 002,0.3202,0.0107,0.4274
